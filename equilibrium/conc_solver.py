@@ -7,7 +7,7 @@ def moles_to_concentration(moles, volume_nm3):
     # Avogadro's number = 6.022e23 particles/mol
     return moles / (0.6022 * volume_nm3)  # 0.6022 ≈ 6.022e23 / 1e27 * 1e3
 
-def solve_equilibrium(moles_metal, moles_ligand, volume_nm3, k_values, temp=300, initial_guess=None):
+def solve_equilibrium(moles_metal, moles_ligand, volume_nm3, logk_values, temp=300, initial_guess=None):
     """
     Solves equilibrium concentrations for metal-ligand complexes.
     
@@ -24,7 +24,8 @@ def solve_equilibrium(moles_metal, moles_ligand, volume_nm3, k_values, temp=300,
     """
     en0 = moles_to_concentration(moles_ligand, volume_nm3)
     cd0 = moles_to_concentration(moles_metal, volume_nm3)
-    n_complexes = len(k_values)
+    n_complexes = len(logk_values)
+    k_values = np.array([10**i for i in logk_values]) 
     
     # Define the system of equations dynamically
     def equations(vars):
@@ -47,11 +48,12 @@ def solve_equilibrium(moles_metal, moles_ligand, volume_nm3, k_values, temp=300,
                 # ci = ki * c_{i-1} * en
                 eq = complexes[i] - k_values[i] * complexes[i-1] * en
             eqs.append(eq)
-        return eqs
+    
+        return(eqs)
     
     # Initial guess
     if initial_guess is None:
-        initial_guess = [en0 * 0.1, cd0 * 0.1] + [0.0] * n_complexes
+        initial_guess = [en0, cd0] + [0.01] * n_complexes
     
     # Solve
     solution = fsolve(equations, initial_guess)
@@ -60,7 +62,7 @@ def solve_equilibrium(moles_metal, moles_ligand, volume_nm3, k_values, temp=300,
     en_eq, cd_eq = solution[0], solution[1]
     complexes_eq = solution[2:]
     return {
-        'free_ligand': en_eq,
-        'free_metal': cd_eq,
-        'complexes': complexes_eq
+        'free_ligand': en_eq, #*(0.6022 * volume_nm3),
+        'free_metal': cd_eq, #*(0.6022 * volume_nm3),
+        'complexes': complexes_eq #*(0.6022 * volume_nm3)
     }

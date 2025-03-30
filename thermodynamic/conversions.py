@@ -38,7 +38,7 @@ def dg_to_logk(dg_values, total_metal, total_ligand, volume_nm3, temp=300, model
         for i in range(n_steps):
             if model == 'sequential':
                 # n_{i+1} = n_i * exp(-ΔG_i / RT) * [L]
-                eq = populations[i+1] - populations[i] * np.exp(-dg_values[i] / RT) * free_ligand
+                eq = populations[i+1] - populations[i] * np.exp(dg_values[i] / RT) * free_ligand
             elif model == 'nme':
                 # Custom model (e.g., n4 depends on n3)
                 # ... (extend for other models)
@@ -79,10 +79,14 @@ def logk_to_dg(logk_values, total_metal, total_ligand, volume_nm3, temp=300, mod
     from equilibrium.conc_solver import solve_equilibrium  # Reuse equilibrium solver
     
     # Solve equilibrium to get populations and free ligand
-    k_values = [10**k for k in logk_values]
-    result = solve_equilibrium(total_metal, total_ligand, volume_nm3, k_values)
-    populations = [result['free_metal']] + result['complexes']
-    free_ligand = result['free_ligand']
+    result = solve_equilibrium(total_metal, total_ligand, volume_nm3, logk_values)
+    fmetal = result['free_metal'] 
+    populations = np.append(fmetal,
+                             np.array(result['complexes']))
+    # transform populations being adimensional
+    populations = populations * (0.6022*volume_nm3)
+
+    free_ligand = result['free_ligand'] * (0.6022*volume_nm3)
     
     # Compute ΔG from populations and ligand
     R = 8.314e-3
