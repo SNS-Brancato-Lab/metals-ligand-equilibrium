@@ -31,6 +31,20 @@ logk = dg_to_logk(
     model="sequential",
 )
 
+# ΔG to logK (sequential model) with errors
+dg_values = [28.5, 22.1, 12.3] # Hypothetical ΔG in kJ/mol
+dg_std = [2, 1, 1] # Hypothetical ΔG std in kJ/mol
+logk_mean, logk_std = dg_to_logk(
+    dg_values=dg_values,
+    total_metal=10,
+    total_ligand=30,
+    volume_nm3=302,
+    temp=300,
+    model="sequential",
+    dg_std=dg_std
+)
+
+
 # logK to ΔG
 
 dg = logk_to_dg(
@@ -41,5 +55,9 @@ dg = logk_to_dg(
 )
 
 print_equilibrium(results)
+# no errors
 print_results("Computed logK Values", logk, "Step", "")
+# with errors
+print_results("Computed logK Values (with errors)", logk_mean, "Step", "", logk_std)
+
 print_results("Computed ΔG Values", dg, "Step", "kJ/mol")

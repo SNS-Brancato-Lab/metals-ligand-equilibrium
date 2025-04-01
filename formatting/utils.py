@@ -8,13 +8,14 @@ def print_header(title, width=40):
 def print_footer(width=40):
     print("└" + "─" * (width-2) + "┘")
 
-def print_results(title, values, value_label="Value", unit=""):
+def print_results(title, values, value_label="Value", unit="", sdt_list = None,):
     """
     Print numerical results in a formatted box with aligned columns.
     
     Args:
         title (str): Header title
         values (list): List of numerical values
+        sdt (str): List of uncertities for values
         value_label (str): Description of values (e.g., "Complex")
         unit (str): Measurement unit (e.g., "kJ/mol")
     """
@@ -26,15 +27,26 @@ def print_results(title, values, value_label="Value", unit=""):
     if not values:
         print(f"│ {'No results'.center(width-4)} │")
     else:
-        for i, val in enumerate(values, 1):
-            if isinstance(val, (np.floating, float)):
-                formatted_val = f"{val:.2f}" if abs(val) >= 0.01 else f"{val:.2e}"
-            else:
-                formatted_val = str(val)
+        if sdt_list == None:
+            for i, val in enumerate(values, 1):
+                if isinstance(val, (np.floating, float)):
+                    formatted_val = f"{val:.2f}" if abs(val) >= 0.01 else f"{val:.2e}"
+                else:
+                    formatted_val = str(val)
                 
-            line = f"│ {value_label} {i}: {formatted_val:>{max_width}} {unit} │"
-            print(line.ljust(width-1) + "│")
-    
+                line = f"│ {value_label} {i}: {formatted_val:>{max_width}} {unit} │"
+                print(line.ljust(width-1) + "│")
+                   
+        else:
+            for i, (val, sdt) in enumerate(zip(values, sdt_list), 1):
+                if isinstance(val, (np.floating, float)):
+                    formatted_val = f"{val:.2f} ± {sdt:.2f}" if abs(val) >= 0.01 else f"{val:.2e} ± {sdt:.2f}"
+                else:
+                    formatted_val = f"{val} ± {sdt:.2f}"
+                    
+                line = f"│ {value_label} {i}: {formatted_val:>{max_width}} {unit} │"
+                print(line.ljust(width-1) + "│")
+
     print_footer(width)
 
 def print_equilibrium(result):
