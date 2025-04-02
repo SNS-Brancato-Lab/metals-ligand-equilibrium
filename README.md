@@ -14,6 +14,9 @@ To run correctly the analysis one should go to scripts, insert the values of log
 The script will take into account of denticity and print the equilibrium concentrations, constants and $\Delta$ G one should expect from Metadynamics coverged profiles if matches experiemntal pKs.\
 Finally just run\
 `python metal-ligand-equil.py`
+
+![Ouput Example](images/output_example.png)  
+*Figure 1: Example of metal-ligand-equil.py output.*
 ## Reference
 For a complete and detailed reference, please look at ...
 ## Contacts
